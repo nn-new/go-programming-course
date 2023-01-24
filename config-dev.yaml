@@ -1,0 +1,11 @@
+app:
+    port: 8000
+mongo:
+    uri: 'mongodb:localhost:27017'
+    db: 'sxexpo'
+    user: 'root'
+    pass: 'password'
+jwt:
+    secret: 'secret'
+postgresql:
+    connection: 'host=localhost user=root password=password dbname=postgres port=5432 sslmode=disable'

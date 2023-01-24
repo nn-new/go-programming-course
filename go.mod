@@ -9,6 +9,8 @@ require (
 	github.com/labstack/gommon v0.4.0
 	github.com/spf13/viper v1.15.0
 	go.mongodb.org/mongo-driver v1.11.1
+	gorm.io/driver/postgres v1.4.6
+	gorm.io/gorm v1.24.3
 )
 
 require (
@@ -31,8 +33,6 @@ require (
 	golang.org/x/time v0.3.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gorm.io/driver/postgres v1.4.6 // indirect
-	gorm.io/gorm v1.24.3 // indirect
 )
 
 require (
