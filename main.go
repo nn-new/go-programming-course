@@ -20,6 +20,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 type CustomValidator struct {
@@ -55,6 +57,8 @@ func main() {
 	}()
 
 	mongodb := client.Database(viper.GetString("mongo.db"))
+	dsn := viper.GetString("postgresql.connection")
+	postgres, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	e.Validator = &CustomValidator{validator: validator.New()}
 
@@ -62,7 +66,7 @@ func main() {
 		return c.String(http.StatusOK, "OK!")
 	})
 
-	e.POST("/login", user.Login)
+	e.POST("/login", user.Login(user.GetUser(postgres)))
 
 	r := e.Group("")
 	config := echojwt.Config{
@@ -94,6 +98,8 @@ func initConfig() {
 	viper.SetDefault("mongo.db", "sxexpo")
 	viper.SetDefault("mongo.user", "root")
 	viper.SetDefault("mongo.pass", "password")
+
+	viper.SetDefault("postgresql.connection", "host=localhost user=root password=password dbname=postgres port=5432 sslmode=disable")
 
 	viper.SetDefault("jwt.secret", "secret")
 

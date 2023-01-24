@@ -10,5 +10,19 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=password
       - MONGO_INITDB_DATABASE=sxexpo
     volumes:
-      - ./mongo-local/init-mongo.js:/docker-entrypoint-initdb.d/0-init-mongo.js:ro
-      - ./seeds/mongo/init-data.js:/docker-entrypoint-initdb.d/1-init-data.js:ro
+      - mongodb-local:/data/db
+
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password
+      PGDATA: /data/postgres
+    volumes:
+      - ./postgres-local/:/data/postgres
+    ports:
+      - "5432:5432"
+    
+volumes:
+  mongodb-local:
+    driver: local
