@@ -2,6 +2,7 @@ package privilege
 
 import (
 	"context"
+	"privilege/domain/pagination"
 
 	"github.com/labstack/gommon/log"
 	"go.mongodb.org/mongo-driver/bson"
@@ -9,35 +10,33 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func GetPrivilege(db *mongo.Database) func(context.Context) ([]Privilege, error) {
-	return func(ctx context.Context) ([]Privilege, error) {
+func GetPrivilege(db *mongo.Database) func(context.Context, pagination.Pagination) ([]Privilege, error) {
+	return func(ctx context.Context, pag pagination.Pagination) ([]Privilege, error) {
 		collection := getPrivilegeCollection(db)
 
-		filter := bson.M{"is_deleted": bson.M{"$ne": true}}
+		filter := bson.D{{Key: "is_deleted", Value: bson.D{{Key: "$ne", Value: true}}}}
+		matchStage := bson.D{{Key: "$match", Value: filter}}
 
-		cur, err := collection.Find(ctx, filter)
-		if err != nil {
-			log.Error(err)
+		limitStage := bson.D{{
+			Key: "$limit", Value: pag.GetPageSize(),
+		}}
+		skipStage := bson.D{{
+			Key: "$skip", Value: (pag.GetPage() - 1) * pag.GetPageSize(),
+		}}
+
+		var sortStage primitive.D
+		if pag.Sort != "" {
+			sortStage = bson.D{{Key: "$sort", Value: bson.D{
+				{Key: pag.Sort, Value: pag.GetDirection()},
+			},
+			}}
+		} else {
+			sortStage = bson.D{{Key: "$sort", Value: bson.D{{Key: "_id", Value: pag.GetDirection()}}}}
 		}
 
-		// limitStage := bson.D{{
-		// 	Key: "$limit", Value: pag.GetPageSize(),
-		// }}
-		// skipStage := bson.D{{
-		// 	Key: "$skip", Value: (pag.GetPage() - 1) * pag.GetPageSize(),
-		// }}
+		pipeline := mongo.Pipeline{matchStage, sortStage, skipStage, limitStage}
 
-		// var sortStage primitive.D
-		// if pag.Sort != "" {
-		// 	sortStage = bson.D{{Key: "$sort", Value: bson.D{
-		// 		{Key: pag.Sort, Value: pag.GetDirection()},
-		// 	},
-		// 	}}
-		// } else {
-		// 	sortStage = bson.D{{Key: "$sort", Value: bson.D{{Key: "_id", Value: pag.GetDirection()}}}}
-		// }
-
-		// pipeline := mongo.Pipeline{filter, sortStage, skipStage, limitStage}
+		cur, err := collection.Aggregate(ctx, pipeline)
 
 		results := []Privilege{}
 		if err := cur.All(ctx, &results); err != nil {
@@ -57,7 +56,6 @@ func GetPrivilegeById(db *mongo.Database) func(context.Context, primitive.Object
 			{"_id": bson.M{"$eq": id}},
 			{"is_deleted": bson.M{"$ne": true}},
 		}}
-
 
 		privilege := Privilege{}
 		err := collection.FindOne(ctx, filter).Decode(&privilege)

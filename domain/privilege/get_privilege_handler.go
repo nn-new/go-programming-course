@@ -2,7 +2,6 @@ package privilege
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"privilege/domain/pagination"
 
@@ -10,10 +9,10 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type getPrivileges func(context.Context) ([]Privilege, error)
+type getPrivileges func(context.Context, pagination.Pagination) ([]Privilege, error)
 
-func (fn getPrivileges) GetPrivilege(ctx context.Context) ([]Privilege, error) {
-	return fn(ctx)
+func (fn getPrivileges) GetPrivilege(ctx context.Context, pag pagination.Pagination) ([]Privilege, error) {
+	return fn(ctx, pag)
 }
 
 func GetPrivilegeHandler(svc getPrivileges) echo.HandlerFunc {
@@ -24,9 +23,7 @@ func GetPrivilegeHandler(svc getPrivileges) echo.HandlerFunc {
 			return c.String(http.StatusBadRequest, "bad request")
 		}
 
-		fmt.Printf("pagination: %v\n", pagination)
-
-		privileges, err := svc.GetPrivilege(c.Request().Context())
+		privileges, err := svc.GetPrivilege(c.Request().Context(), pagination)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}

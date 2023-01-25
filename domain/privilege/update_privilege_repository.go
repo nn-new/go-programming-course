@@ -12,7 +12,10 @@ func UpdatePrivilege(db *mongo.Database) func(context.Context, Privilege) error 
 	return func(ctx context.Context, privilege Privilege) error {
 		collection := getPrivilegeCollection(db)
 
-		filter := bson.M{"_id": privilege.ID}
+		filter := bson.M{"$and": []bson.M{
+			{"_id": bson.M{"$eq": privilege.ID}},
+			{"is_deleted": bson.M{"$ne": true}},
+		}}
 
 		ur, err := collection.ReplaceOne(context.Background(), filter, privilege)
 		if ur.ModifiedCount == 0 {
