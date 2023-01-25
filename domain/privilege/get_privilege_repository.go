@@ -58,6 +58,7 @@ func GetPrivilegeById(db *mongo.Database) func(context.Context, primitive.Object
 			{"is_deleted": bson.M{"$ne": true}},
 		}}
 
+
 		privilege := Privilege{}
 		err := collection.FindOne(ctx, filter).Decode(&privilege)
 		return privilege, err

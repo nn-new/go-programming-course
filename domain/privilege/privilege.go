@@ -8,6 +8,7 @@ import (
 
 type Privilege struct {
 	ID               primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
+	Image            string             `bson:"image" json:"image" validate:"required"`
 	Title            string             `bson:"title" json:"title" validate:"required"`
 	CatalogId        string             `bson:"catalog_id" json:"catalogId"`
 	CategoryId       string             `bson:"category_id" json:"categoryId"`

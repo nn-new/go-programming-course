@@ -57,6 +57,7 @@ func main() {
 	}()
 
 	mongodb := client.Database(viper.GetString("mongo.db"))
+	
 	dsn := viper.GetString("postgresql.connection")
 	postgres, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
