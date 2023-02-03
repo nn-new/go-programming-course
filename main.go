@@ -7,6 +7,7 @@ import (
 	"privilege/domain/category"
 	"privilege/domain/privilege"
 	privilegetype "privilege/domain/privilege_type"
+	"privilege/domain/upload"
 	"privilege/domain/user"
 	"strings"
 	"time"
@@ -57,7 +58,7 @@ func main() {
 	}()
 
 	mongodb := client.Database(viper.GetString("mongo.db"))
-	
+
 	dsn := viper.GetString("postgresql.connection")
 	postgres, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
@@ -68,6 +69,7 @@ func main() {
 	})
 
 	e.POST("/login", user.Login(user.GetUser(postgres)))
+	e.POST("/upload", upload.Upload)
 
 	r := e.Group("")
 	config := echojwt.Config{
