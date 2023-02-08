@@ -6,6 +6,7 @@ import (
 )
 
 type Pagination struct {
+	Search    string `query:"search"`
 	Sort      string `query:"sort"`
 	Direction string `query:"direction"`
 	Page      string `query:"page"`

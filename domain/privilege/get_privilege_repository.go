@@ -14,8 +14,26 @@ func GetPrivilege(db *mongo.Database) func(context.Context, pagination.Paginatio
 	return func(ctx context.Context, pag pagination.Pagination) ([]Privilege, error) {
 		collection := getPrivilegeCollection(db)
 
-		filter := bson.D{{Key: "is_deleted", Value: bson.D{{Key: "$ne", Value: true}}}}
-		matchStage := bson.D{{Key: "$match", Value: filter}}
+		var filterTitle, filterPrivilegeId, filterDiscountText, filterSearch primitive.E
+		if pag.Search != "" {
+			filterTitle = buildFilterSearch("title", pag.Search)
+			filterPrivilegeId = buildFilterSearch("privilege_id", pag.Search)
+			filterDiscountText = buildFilterSearch("discount_text", pag.Search)
+			filterSearch = bson.E{
+				Key: "$or", Value: []bson.D{
+					{filterTitle},
+					{filterPrivilegeId},
+					{filterDiscountText},
+				},
+			}
+		}
+
+		matchStage := bson.D{{
+			Key: "$match", Value: bson.D{
+				filterSearch,
+				{Key: "is_deleted", Value: nil},
+			},
+		}}
 
 		limitStage := bson.D{{
 			Key: "$limit", Value: pag.GetPageSize(),
@@ -26,10 +44,7 @@ func GetPrivilege(db *mongo.Database) func(context.Context, pagination.Paginatio
 
 		var sortStage primitive.D
 		if pag.Sort != "" {
-			sortStage = bson.D{{Key: "$sort", Value: bson.D{
-				{Key: pag.Sort, Value: pag.GetDirection()},
-			},
-			}}
+			sortStage = bson.D{{Key: "$sort", Value: bson.D{{Key: pag.Sort, Value: pag.GetDirection()}}}}
 		} else {
 			sortStage = bson.D{{Key: "$sort", Value: bson.D{{Key: "_id", Value: pag.GetDirection()}}}}
 		}
@@ -60,5 +75,14 @@ func GetPrivilegeById(db *mongo.Database) func(context.Context, primitive.Object
 		privilege := Privilege{}
 		err := collection.FindOne(ctx, filter).Decode(&privilege)
 		return privilege, err
+	}
+}
+
+func buildFilterSearch(key, searchKeyword string) bson.E {
+	return bson.E{
+		Key: key, Value: primitive.Regex{
+			Pattern: searchKeyword,
+			Options: "im",
+		},
 	}
 }
