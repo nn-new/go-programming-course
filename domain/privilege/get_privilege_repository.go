@@ -49,7 +49,12 @@ func GetPrivilege(db *mongo.Database) func(context.Context, pagination.Paginatio
 			sortStage = bson.D{{Key: "$sort", Value: bson.D{{Key: "_id", Value: pag.GetDirection()}}}}
 		}
 
-		pipeline := mongo.Pipeline{matchStage, sortStage, skipStage, limitStage}
+		var pipeline mongo.Pipeline
+		if pag.IsDownload {
+			pipeline = mongo.Pipeline{matchStage, sortStage}
+		} else {
+			pipeline = mongo.Pipeline{matchStage, sortStage, skipStage, limitStage}
+		}
 
 		cur, err := collection.Aggregate(ctx, pipeline)
 

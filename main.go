@@ -88,6 +88,7 @@ func main() {
 
 	r.GET("/privileges", privilege.GetPrivilegeHandler(privilege.GetPrivilege(mongodb)))
 	r.GET("/privileges/:id", privilege.GetPrivilegeByIdHandler(privilege.GetPrivilegeById(mongodb)))
+	r.GET("/privileges/download", privilege.DownloadPrivilegeHandler(privilege.GetPrivilege(mongodb)))
 	r.POST("/privileges", privilege.CreatePrivilegeHandler(privilege.CreatePrivilege(mongodb)))
 	r.PUT("/privileges", privilege.UpdatePrivilegeHandler(privilege.UpdatePrivilege(mongodb)))
 	r.DELETE("/privileges/:id", privilege.DeletePrivilegeHandler(privilege.DeletePrivilege(mongodb)))

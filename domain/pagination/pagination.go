@@ -6,11 +6,12 @@ import (
 )
 
 type Pagination struct {
-	Search    string `query:"search"`
-	Sort      string `query:"sort"`
-	Direction string `query:"direction"`
-	Page      string `query:"page"`
-	PageSize  string `query:"pageSize"`
+	Search     string `query:"search"`
+	Sort       string `query:"sort"`
+	Direction  string `query:"direction"`
+	Page       string `query:"page"`
+	PageSize   string `query:"pageSize"`
+	IsDownload bool
 }
 
 func (p Pagination) GetDirection() int {
