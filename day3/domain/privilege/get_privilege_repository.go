@@ -2,6 +2,7 @@ package privilege
 
 import (
 	"context"
+	"fmt"
 	"privilege/domain/pagination"
 
 	"github.com/labstack/gommon/log"
@@ -63,6 +64,22 @@ func GetPrivilege(db *mongo.Database) func(context.Context, pagination.Paginatio
 			log.Error(err)
 		}
 		cur.Close(ctx)
+
+		cur, curErr := collection.Aggregate(ctx, mongo.Pipeline{matchStage})
+
+		if curErr != nil {
+			log.Error(curErr)
+		}
+		if err := cur.Err(); err != nil {
+			log.Error(err)
+		}
+		defer cur.Close(ctx)
+
+		total := 0
+		for cur.Next(ctx) {
+			total++
+		}
+
 
 		return results, err
 	}
